@@ -1,6 +1,6 @@
 # Login Seguro
 
-Projeto acadêmico da disciplina de Programação para Internet.
+Projeto acadêmico da disciplina de Aplicativos WEB
 
 ## Objetivo
 
