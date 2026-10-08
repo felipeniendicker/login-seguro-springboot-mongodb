@@ -8,7 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -41,13 +40,6 @@ public class AuthController {
             );
         }
 
-        if (!Boolean.TRUE.equals(usuario.getTermosAceitos())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "É necessário aceitar os Termos de Uso e a Política de Privacidade"
-            );
-        }
-
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -56,7 +48,6 @@ public class AuthController {
         }
 
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        usuario.setTermosAceitosEm(LocalDateTime.now());
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
         return Map.of(
