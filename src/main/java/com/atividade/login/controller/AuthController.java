@@ -28,35 +28,6 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
-    @PostMapping("/cadastro")
-    public Map<String, String> cadastrar(@RequestBody Usuario usuario) {
-
-        String perfil = usuario.getPerfil();
-
-        if (!"ALUNO".equals(perfil) && !"EMPRESA".equals(perfil)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Perfil inválido para cadastro público"
-            );
-        }
-
-        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "E-mail já cadastrado"
-            );
-        }
-
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        Usuario usuarioSalvo = usuarioRepository.save(usuario);
-
-        return Map.of(
-                "nome", usuarioSalvo.getNome(),
-                "email", usuarioSalvo.getEmail(),
-                "perfil", usuarioSalvo.getPerfil()
-        );
-    }
-
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody Map<String, String> dados) {
 
