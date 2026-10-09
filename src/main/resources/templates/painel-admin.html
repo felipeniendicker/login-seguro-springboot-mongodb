@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Painel do administrador | Login Seguro</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments :: cabecalho('Painel do administrador')}"></header>
+<main class="container">
+	<nav th:replace="~{fragments :: navegacao(${perfil})}"></nav>
+	<section class="cartao painel">
+		<span class="etiqueta" th:text="${perfil}">ADMIN</span>
+		<h1>Área administrativa</h1>
+		<p th:text="|Olá, ${nome}. Este conteúdo é exclusivo do perfil ADMIN.|">
+			Conteúdo administrativo.
+		</p>
+	</section>
+</main>
+<footer th:replace="~{fragments :: rodape}"></footer>
+</body>
+</html>
