@@ -30,6 +30,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -116,6 +117,30 @@ class AuthSessionControllerTest {
 	}
 
 	@Test
+	@WithMockUser(username = "moderador@exemplo.test", roles = "MODERADOR")
+	void moderadorDeveConsultarUsuarioAtual() throws Exception {
+		Usuario moderador = criarUsuario("moderador@exemplo.test", "MODERADOR");
+		when(usuarioRepository.findByEmail(moderador.getEmail()))
+				.thenReturn(Optional.of(moderador));
+
+		mockMvc.perform(get("/api/auth/me"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.perfil").value("MODERADOR"));
+	}
+
+	@Test
+	@WithMockUser(username = "admin@exemplo.test", roles = "ADMIN")
+	void adminDeveConsultarUsuarioAtual() throws Exception {
+		Usuario admin = criarUsuario("admin@exemplo.test", "ADMIN");
+		when(usuarioRepository.findByEmail(admin.getEmail()))
+				.thenReturn(Optional.of(admin));
+
+		mockMvc.perform(get("/api/auth/me"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.perfil").value("ADMIN"));
+	}
+
+	@Test
 	void deveInvalidarSessaoNoLogout() throws Exception {
 		Usuario usuario = criarUsuario();
 		when(usuarioRepository.findByEmail(EMAIL)).thenReturn(Optional.of(usuario));
@@ -188,12 +213,16 @@ class AuthSessionControllerTest {
 	}
 
 	private Usuario criarUsuario() {
+		return criarUsuario(EMAIL, "USUARIO");
+	}
+
+	private Usuario criarUsuario(String email, String perfil) {
 		Usuario usuario = new Usuario();
 		ReflectionTestUtils.setField(usuario, "id", "usuario-id-teste");
 		usuario.setNome("Usuário Teste");
-		usuario.setEmail(EMAIL);
+		usuario.setEmail(email);
 		usuario.setSenha(new BCryptPasswordEncoder().encode(SENHA));
-		usuario.setPerfil("USUARIO");
+		usuario.setPerfil(perfil);
 		return usuario;
 	}
 
