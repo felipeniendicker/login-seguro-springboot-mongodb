@@ -1,98 +1,107 @@
 package com.atividade.login.controller;
 
+import java.util.Locale;
+
+import com.atividade.login.dto.CsrfTokenResponse;
+import com.atividade.login.dto.LoginRequest;
+import com.atividade.login.dto.UsuarioResponse;
 import com.atividade.login.model.Usuario;
 import com.atividade.login.repository.UsuarioRepository;
-import com.atividade.login.service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDateTime;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+	private final AuthenticationManager authenticationManager;
+	private final SecurityContextRepository securityContextRepository;
+	private final SessionAuthenticationStrategy sessionAuthenticationStrategy;
+	private final UsuarioRepository usuarioRepository;
 
-    public AuthController(
-            UsuarioRepository usuarioRepository,
-            PasswordEncoder passwordEncoder,
-            JwtService jwtService) {
+	public AuthController(
+			AuthenticationManager authenticationManager,
+			SecurityContextRepository securityContextRepository,
+			SessionAuthenticationStrategy sessionAuthenticationStrategy,
+			UsuarioRepository usuarioRepository) {
+		this.authenticationManager = authenticationManager;
+		this.securityContextRepository = securityContextRepository;
+		this.sessionAuthenticationStrategy = sessionAuthenticationStrategy;
+		this.usuarioRepository = usuarioRepository;
+	}
 
-        this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-    }
+	@GetMapping("/csrf")
+	public CsrfTokenResponse csrf(CsrfToken csrfToken) {
+		return new CsrfTokenResponse(
+				csrfToken.getHeaderName(),
+				csrfToken.getParameterName(),
+				csrfToken.getToken());
+	}
 
-    @PostMapping("/cadastro")
-    public Map<String, String> cadastrar(@RequestBody Usuario usuario) {
+	@PostMapping("/login")
+	public UsuarioResponse login(
+			@Valid @RequestBody LoginRequest request,
+			HttpServletRequest httpRequest,
+			HttpServletResponse httpResponse) {
+		String emailNormalizado = normalizarEmail(request.email());
 
-        String perfil = usuario.getPerfil();
+		try {
+			Authentication authentication = authenticationManager.authenticate(
+					UsernamePasswordAuthenticationToken.unauthenticated(
+							emailNormalizado,
+							request.senha()));
+			Usuario usuario = buscarUsuario(emailNormalizado);
+			sessionAuthenticationStrategy.onAuthentication(
+					authentication,
+					httpRequest,
+					httpResponse);
 
-        if (!"ALUNO".equals(perfil) && !"EMPRESA".equals(perfil)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Perfil inválido para cadastro público"
-            );
-        }
+			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+			securityContext.setAuthentication(authentication);
+			SecurityContextHolder.setContext(securityContext);
+			securityContextRepository.saveContext(
+					securityContext,
+					httpRequest,
+					httpResponse);
 
-        if (!Boolean.TRUE.equals(usuario.getTermosAceitos())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "É necessário aceitar os Termos de Uso e a Política de Privacidade"
-            );
-        }
+			return UsuarioResponse.from(usuario);
+		} catch (AuthenticationException exception) {
+			throw new ResponseStatusException(
+					HttpStatus.UNAUTHORIZED,
+					"Credenciais inválidas");
+		}
+	}
 
-        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "E-mail já cadastrado"
-            );
-        }
+	@GetMapping("/me")
+	public UsuarioResponse me(Authentication authentication) {
+		return UsuarioResponse.from(buscarUsuario(authentication.getName()));
+	}
 
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        usuario.setTermosAceitosEm(LocalDateTime.now());
-        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+	private Usuario buscarUsuario(String email) {
+		return usuarioRepository.findByEmail(email)
+				.orElseThrow(() -> new ResponseStatusException(
+						HttpStatus.UNAUTHORIZED,
+						"Usuário autenticado não encontrado"));
+	}
 
-        return Map.of(
-                "nome", usuarioSalvo.getNome(),
-                "email", usuarioSalvo.getEmail(),
-                "perfil", usuarioSalvo.getPerfil()
-        );
-    }
-
-    @PostMapping("/login")
-    public Map<String, String> login(@RequestBody Map<String, String> dados) {
-
-        String email = dados.get("email");
-        String senha = dados.get("senha");
-
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED,
-                        "Credenciais inválidas"
-                ));
-
-        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Credenciais inválidas"
-            );
-        }
-
-        String token = jwtService.gerarToken(usuario);
-
-        return Map.of(
-                "nome", usuario.getNome(),
-                "email", usuario.getEmail(),
-                "perfil", usuario.getPerfil(),
-                "token", token
-        );
-    }
+	private String normalizarEmail(String email) {
+		return email.trim().toLowerCase(Locale.ROOT);
+	}
 }

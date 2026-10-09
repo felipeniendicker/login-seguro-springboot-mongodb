@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Painel do usuário | Login Seguro</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments :: cabecalho('Painel do usuário')}"></header>
+<main class="container">
+	<nav th:replace="~{fragments :: navegacao(${perfil})}"></nav>
+	<section class="cartao painel">
+		<span class="etiqueta" th:text="${perfil}">USUARIO</span>
+		<h1>Bem-vindo, <span th:text="${nome}">Usuário</span></h1>
+		<p>Este é o espaço disponível para todos os usuários autenticados.</p>
+		<dl class="dados-usuario">
+			<dt>E-mail</dt>
+			<dd th:text="${email}">usuario@exemplo.test</dd>
+		</dl>
+	</section>
+</main>
+<footer th:replace="~{fragments :: rodape}"></footer>
+</body>
+</html>

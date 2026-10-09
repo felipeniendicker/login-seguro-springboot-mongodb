@@ -1,34 +1,28 @@
 package com.atividade.login.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
+@Document(collection = "usuarios")
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     private String nome;
 
-    @Column(unique = true, nullable = false)
+    @Indexed(unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String senha;
 
-    @Column(nullable = false)
     private String perfil;
-
-    private Boolean termosAceitos;
-
-    private LocalDateTime termosAceitosEm;
 
     public Usuario() {
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
@@ -62,20 +56,5 @@ public class Usuario {
 
     public void setPerfil(String perfil) {
         this.perfil = perfil;
-    }
-    public Boolean getTermosAceitos() {
-        return termosAceitos;
-    }
-
-    public void setTermosAceitos(Boolean termosAceitos) {
-        this.termosAceitos = termosAceitos;
-    }
-
-    public LocalDateTime getTermosAceitosEm() {
-        return termosAceitosEm;
-    }
-
-    public void setTermosAceitosEm(LocalDateTime termosAceitosEm) {
-        this.termosAceitosEm = termosAceitosEm;
     }
 }

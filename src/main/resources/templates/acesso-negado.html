@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Acesso negado | Login Seguro</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments :: cabecalho('Acesso negado')}"></header>
+<main class="container conteudo-central">
+	<section class="cartao estado">
+		<p class="codigo-erro">403</p>
+		<h1>Você não possui permissão para acessar esta página.</h1>
+		<p>Retorne ao seu painel para continuar.</p>
+		<a class="botao link-botao" th:href="@{/painel}">Voltar ao painel</a>
+	</section>
+</main>
+<footer th:replace="~{fragments :: rodape}"></footer>
+</body>
+</html>
