@@ -32,6 +32,7 @@ class UsuarioControllerTest {
 	void setUp() {
 		mockMvc = MockMvcBuilders
 				.standaloneSetup(new UsuarioController(usuarioService))
+				.setControllerAdvice(new ValidationExceptionHandler())
 				.build();
 	}
 
