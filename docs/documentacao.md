@@ -1,23 +1,16 @@
-<!--
-Orientação para a exportação em PDF:
-- utilizar o modelo institucional, quando disponível;
-- observar a ABNT NBR 14724:2024;
-- papel A4;
-- margens de 3 cm na parte superior e esquerda e 2 cm na parte inferior e direita;
-- fonte legível, tamanho 12 no texto principal;
-- espaçamento de 1,5 no corpo do texto;
-- paginação, sumário e elementos pré-textuais conforme as regras da instituição.
--->
-
 <div align="center">
 
-**[NOME DA INSTITUIÇÃO]**
+**UNIVERSIDADE DE MOGI DAS CRUZES**
 
-**[NOME DO CURSO]**
+**SISTEMAS DE INFORMAÇÃO**
+
+**APLICATIVOS WEB**
 
 <br><br><br>
 
-**[NOME DO ALUNO]**
+**FELIPE RAFAEL NIENDICKER**
+
+**RA 11231101151**
 
 <br><br><br>
 
@@ -27,161 +20,157 @@ Orientação para a exportação em PDF:
 
 <br><br><br>
 
-Professor(a): **[NOME DO PROFESSOR OU PROFESSORA]**
+Professor: **Alessandro Aparecido da Silva Horas**
 
 <br><br><br>
 
-**[CIDADE]**
+**MOGI DAS CRUZES**
 
 **2026**
 
 </div>
 
----
-
 ## 1 INTRODUÇÃO
 
-A autenticação é uma parte essencial das aplicações web que trabalham com
-dados de usuários e áreas restritas. Uma implementação inadequada pode expor
-senhas, permitir acesso indevido ou manter sessões inválidas ativas. Por esse
-motivo, o desenvolvimento de um sistema de login deve considerar proteção de
-credenciais, validação de entradas, controle de acesso e gerenciamento seguro
-das sessões.
+O Login Seguro foi desenvolvido para a disciplina de Aplicativos Web. A
+aplicação reúne os fluxos de cadastro, login e logout, o controle de acesso por
+perfis e a persistência das sessões de usuários.
 
-Este trabalho apresenta o desenvolvimento do projeto **Login Seguro**, criado
-para a disciplina de Programação para Internet. A aplicação foi construída com
-Java 17, Spring Boot, Spring Security, Thymeleaf e MongoDB Atlas. O sistema
-oferece cadastro, login, logout, três perfis de acesso e páginas protegidas. As
-senhas são transformadas com BCrypt e as sessões HTTP são mantidas no MongoDB.
+A aplicação utiliza Java 17, Spring Boot, Spring Security, Thymeleaf e MongoDB
+Atlas. As senhas são processadas com BCrypt antes da gravação, e o navegador
+mantém apenas o identificador da sessão em um cookie. Os dados dos usuários e
+das sessões permanecem no MongoDB.
 
-O projeto foi desenvolvido a partir de uma cópia independente de uma estrutura
-anterior. Funcionalidades que não pertenciam ao tema de autenticação foram
-removidas, preservando somente elementos que puderam ser adaptados ao novo
-objetivo acadêmico.
+O sistema disponibiliza uma API REST e uma interface web renderizada no
+servidor. As duas formas de acesso utilizam as mesmas regras de autenticação e
+autorização. Essa organização permitiu demonstrar os recursos de segurança sem
+misturar a apresentação visual com as regras de negócio.
 
 ## 2 OBJETIVOS
 
 ### 2.1 Objetivo geral
 
-Desenvolver uma aplicação web de autenticação e autorização que demonstre boas
-práticas básicas de segurança, persistência e organização de código utilizando
-o ecossistema Spring.
+Desenvolver uma aplicação web para demonstrar, de forma prática, autenticação,
+autorização e persistência de sessões com tecnologias do ecossistema Spring.
 
 ### 2.2 Objetivos específicos
 
-- Permitir o cadastro de usuários com validação dos dados.
+- Cadastrar usuários com validação de nome, e-mail e senha.
 - Normalizar o e-mail e impedir cadastros duplicados.
-- Armazenar somente o hash BCrypt da senha.
+- Armazenar a senha somente como hash BCrypt.
 - Autenticar usuários por e-mail e senha.
-- Manter a autenticação por sessão HTTP persistida no MongoDB.
-- Encerrar e invalidar a sessão durante o logout.
-- Proteger requisições de alteração com token CSRF.
-- Aplicar permissões diferentes aos perfis `USUARIO`, `MODERADOR` e `ADMIN`.
-- Disponibilizar uma interface Thymeleaf simples e responsiva.
-- Manter código, configuração sensível e apresentação visual separados.
-- Utilizar Gitflow para organizar as etapas do desenvolvimento.
+- Persistir sessões HTTP no MongoDB.
+- Invalidar a sessão durante o logout.
+- Proteger requisições de alteração com CSRF.
+- Restringir recursos conforme os perfis `USUARIO`, `MODERADOR` e `ADMIN`.
+- Disponibilizar páginas Thymeleaf responsivas.
+- Separar o código Java, os templates HTML e os estilos CSS.
+- Organizar o desenvolvimento com Gitflow.
 
 ## 3 TECNOLOGIAS UTILIZADAS
 
-O projeto utiliza Java 17 como linguagem e plataforma de execução. A
-documentação oficial do JDK reúne as especificações e APIs dessa versão
-(ORACLE, [s. d.]).
+O Java 17 é a plataforma de execução do projeto (ORACLE, [s. d.]). O Spring
+Boot 4.1.1 configura a aplicação e gerencia as versões das principais
+dependências.
 
-O Spring Boot 4.1.1 organiza a aplicação e suas dependências. Sobre essa base,
-o Spring Security realiza autenticação, controle de acesso, proteção CSRF e
-integração com sessões. O Spring Data MongoDB fornece o repositório utilizado
-para os documentos de usuários.
+O Spring Security autentica os usuários, mantém o contexto de segurança na
+sessão, aplica as permissões e valida os tokens CSRF. O Spring Data MongoDB
+fornece o repositório usado para gravar e consultar usuários.
 
-O MongoDB Atlas é o serviço de banco de dados utilizado. A biblioteca MongoDB
-Spring Session 4.0.0 permite armazenar dados de sessões HTTP no MongoDB, em vez
-de mantê-los somente na memória da aplicação (MONGODB, [s. d.]).
+O MongoDB Atlas armazena os documentos da aplicação. A biblioteca MongoDB
+Spring Session 4.0.0 integra as sessões HTTP ao MongoDB, evitando que o estado
+de autenticação permaneça somente na memória do processo (MONGODB, [s. d.]).
 
-O Thymeleaf processa os templates HTML no servidor e integra formulários com o
-Spring MVC. Essa integração permite vincular campos, apresentar erros de
-validação e gerar URLs relativas ao contexto da aplicação (THYMELEAF, [s. d.]).
+O Thymeleaf processa os templates HTML no servidor e integra os formulários ao
+Spring MVC. A integração permite associar os campos aos objetos Java e exibir
+mensagens de validação (THYMELEAF, [s. d.]).
 
-O Maven Wrapper é utilizado para compilação e execução. JUnit, Mockito, MockMvc
-e Spring Security Test compõem a estratégia de testes automatizados.
+O Maven Wrapper executa a compilação e os testes sem exigir uma instalação
+global do Maven. Os testes utilizam JUnit, Mockito, MockMvc e Spring Security
+Test.
 
 ## 4 ARQUITETURA DO SISTEMA
 
-A aplicação segue uma organização simples em camadas:
+O código está dividido em responsabilidades simples:
 
-- **config:** configura o Spring Security e a persistência das sessões.
-- **controller:** recebe as requisições REST e apresenta as páginas web.
-- **dto:** define os dados aceitos ou devolvidos pelas APIs.
-- **service:** concentra o cadastro e o carregamento de usuários.
-- **repository:** acessa a coleção de usuários por meio do Spring Data.
-- **model:** representa o documento `Usuario` armazenado no MongoDB.
-- **templates:** contém as páginas e os fragmentos Thymeleaf.
-- **static:** contém o arquivo CSS, sem lógica de negócio.
+- `config` contém as configurações de segurança e sessões.
+- `controller` recebe as requisições REST e apresenta as páginas Thymeleaf.
+- `dto` define os dados aceitos e devolvidos pelas APIs.
+- `service` concentra o cadastro e o carregamento dos usuários.
+- `repository` acessa o MongoDB por meio do Spring Data.
+- `model` representa o documento `Usuario`.
+- `templates` contém as páginas e os fragmentos HTML.
+- `static/css` contém os estilos visuais.
 
-O documento `Usuario` mantém identificador, nome, e-mail, hash da senha e
-perfil. A coleção utilizada é `usuarios`. O `UsuarioRepository` estende
+O documento `Usuario` possui identificador, nome, e-mail, hash da senha e
+perfil. Os usuários ficam na coleção `usuarios`. O `UsuarioRepository` estende
 `MongoRepository` e oferece a consulta por e-mail.
 
-As APIs REST e a interface web reutilizam os mesmos serviços e configurações de
-segurança. O formulário HTML de login é processado pelo filtro de autenticação
-do Spring Security, enquanto a API continua aceitando dados JSON. Essa divisão
-evita tratar um formulário como se fosse uma requisição JSON e preserva os
-contratos já testados.
+A API REST e a interface web reutilizam os mesmos serviços e a mesma
+configuração de segurança. O filtro de autenticação do Spring Security processa
+o formulário HTML de login. A API de login recebe JSON e realiza a autenticação
+por meio do `AuthenticationManager`. Essa separação mantém os dois contratos de
+entrada sem duplicar a regra de verificação das credenciais.
 
 ## 5 SEGURANÇA E AUTENTICAÇÃO
 
 ### 5.1 Cadastro e validação
 
 O cadastro recebe nome, e-mail e senha. Os campos são obrigatórios, o e-mail
-deve possuir formato válido e a senha deve ter pelo menos oito caracteres. O
-e-mail é convertido para letras minúsculas e tem espaços externos removidos.
+deve ter formato válido e a senha precisa conter pelo menos oito caracteres.
+Antes da consulta e da gravação, o sistema remove os espaços externos do e-mail
+e converte seus caracteres para letras minúsculas.
 
-A duplicidade é verificada antes da gravação e também pelo índice único do
-MongoDB. A segunda proteção trata requisições simultâneas que tentem cadastrar
-o mesmo e-mail.
+A aplicação consulta o e-mail antes de salvar o usuário. O campo também possui
+um índice único no MongoDB, que protege contra duplicidades causadas por
+requisições simultâneas.
 
-O perfil não faz parte dos dados aceitos no cadastro público. Todo novo usuário
-recebe obrigatoriamente o perfil `USUARIO`.
+O cadastro público não recebe o perfil como parâmetro. O serviço atribui
+`USUARIO` a toda nova conta, impedindo a criação pública de usuários
+privilegiados.
 
 ### 5.2 Proteção das senhas
 
-As senhas são processadas pelo `BCryptPasswordEncoder`. O valor original não é
-armazenado e não pode ser recuperado a partir do hash. Durante o login, o Spring
-Security compara a senha informada com o hash persistido. O uso de uma
-transformação unidirecional para armazenamento de senhas é a finalidade da
-interface `PasswordEncoder` do Spring Security (SPRING SECURITY, [s. d.]a).
+O `BCryptPasswordEncoder` gera o hash armazenado no documento do usuário. A
+senha original não é gravada. Durante o login, o Spring Security compara a
+senha informada com o hash por meio da interface `PasswordEncoder` (SPRING
+SECURITY, [s. d.]a).
 
-As respostas das APIs utilizam um DTO que contém somente identificador, nome,
-e-mail e perfil. Senha e hash não são enviados ao cliente. Os DTOs de entrada
-também mascaram credenciais em sua representação textual para reduzir a
-exposição em logs de diagnóstico.
+As respostas das APIs utilizam um DTO com identificador, nome, e-mail e perfil.
+Esse DTO não possui campo de senha. Os DTOs de entrada também substituem senha
+e token por marcadores protegidos em sua representação textual, reduzindo a
+exposição acidental em logs.
 
 ### 5.3 Login, sessão e logout
 
-O login busca o usuário pelo e-mail normalizado e utiliza o provedor de
-autenticação do Spring Security. Após a autenticação, o contexto de segurança é
-associado à sessão. A estratégia de alteração do identificador da sessão reduz
-o risco de fixação de sessão.
+O login normaliza o e-mail e delega a validação das credenciais ao Spring
+Security. Depois da autenticação, o contexto de segurança é associado à sessão
+HTTP e salvo pelo `SecurityContextRepository`.
 
-O cookie da sessão recebe o nome `SESSION`, utiliza `HttpOnly` e
-`SameSite=Lax`. Em produção HTTPS, a variável `SESSION_COOKIE_SECURE=true`
-ativa o atributo `Secure`. O tempo de inatividade configurado é de 30 minutos.
+A aplicação altera o identificador da sessão no momento da autenticação. Essa
+medida reduz o risco de fixação de sessão. O cookie recebe o nome `SESSION` e
+utiliza `HttpOnly` e `SameSite=Lax`. Em uma execução com HTTPS, a variável
+`SESSION_COOKIE_SECURE=true` ativa o atributo `Secure`. A sessão expira após 30
+minutos de inatividade.
 
-O logout aceita somente requisição `POST`, exige CSRF, invalida a sessão, limpa
-o contexto de autenticação e remove o cookie. A documentação do Spring Security
-recomenda proteção CSRF para login e logout em aplicações baseadas em sessão
-(SPRING SECURITY, [s. d.]b).
+O logout aceita requisições `POST`, exige um token CSRF válido, invalida a
+sessão, limpa a autenticação e remove o cookie. A proteção de login e logout
+contra CSRF segue a orientação do Spring Security para aplicações baseadas em
+sessão (SPRING SECURITY, [s. d.]b).
 
 ### 5.4 Proteção CSRF
 
-O sistema mantém CSRF habilitado. A API disponibiliza o token em
-`/api/auth/csrf`, e os formulários Thymeleaf enviam o token em um campo oculto.
-O token também é associado a um cookie próprio. Uma requisição `POST` sem token
-válido é rejeitada com HTTP 403.
+O CSRF permanece habilitado em toda a aplicação. A API fornece o token em
+`/api/auth/csrf`. Os formulários Thymeleaf enviam o mesmo dado em um campo
+oculto. Nas requisições JSON, o cliente envia o cookie `XSRF-TOKEN` e o valor no
+cabeçalho `X-XSRF-TOKEN`. Uma requisição `POST` sem token válido recebe HTTP
+403.
 
 ## 6 CONTROLE DE ACESSO POR PERFIS
 
-As autoridades do Spring Security utilizam o prefixo `ROLE_`. O perfil gravado
-no usuário é transformado em `ROLE_USUARIO`, `ROLE_MODERADOR` ou `ROLE_ADMIN`
-durante o carregamento da autenticação.
+O `UsuarioDetailsService` transforma o perfil armazenado no MongoDB em uma
+autoridade do Spring Security com o prefixo `ROLE_`. O sistema trabalha com as
+autoridades `ROLE_USUARIO`, `ROLE_MODERADOR` e `ROLE_ADMIN`.
 
 | Recurso | USUARIO | MODERADOR | ADMIN |
 |---|:---:|:---:|:---:|
@@ -190,88 +179,94 @@ durante o carregamento da autenticação.
 | `/painel/admin` | Não | Não | Sim |
 | `/api/auth/me` | Sim | Sim | Sim |
 
-Uma requisição não autenticada para API protegida recebe HTTP 401. Um usuário
-autenticado sem autoridade suficiente recebe HTTP 403. Na interface web, a
-tentativa de abrir diretamente uma página sem permissão apresenta a página de
-acesso negado.
+Uma requisição não autenticada para uma API protegida recebe HTTP 401. Quando o
+usuário está autenticado, mas não possui a autoridade exigida, a API responde
+com HTTP 403. Na interface web, a mesma situação encaminha o usuário para a
+página de acesso negado.
 
 ## 7 INTEGRAÇÃO COM O MONGODB ATLAS
 
-A URI do MongoDB não é gravada no repositório. O arquivo
-`application.properties` referencia a variável `MONGODB_URI`, definida no
-ambiente de execução. O `.env.example` contém somente valores fictícios.
+A aplicação lê a conexão do MongoDB por meio da variável de ambiente
+`MONGODB_URI`. A URI real não faz parte do código-fonte. O `.env.example`
+apresenta somente um formato fictício, enquanto o `.gitignore` impede o
+versionamento de arquivos `.env` locais.
 
-O usuário do banco deve ter permissões restritas ao banco `login_seguro`. O
-controle de acesso de rede do Atlas também deve autorizar somente os endereços
-necessários. A senha presente na URI precisa ser codificada para URL quando
-contiver caracteres especiais.
+O usuário configurado no Atlas deve ter permissões restritas ao banco
+`login_seguro`. O controle de acesso de rede do Atlas limita os endereços que
+podem abrir conexões. Quando a senha contém caracteres especiais, seu valor
+precisa ser codificado para uso na URI.
 
-Os usuários são armazenados na coleção `usuarios`. A anotação
-`@EnableMongoHttpSession` configura as sessões na coleção `sessoes`. Dessa
-forma, a autenticação pode ser recuperada em requisições posteriores e não fica
-limitada à memória do processo. A integração oficial informa que sessões em
-MongoDB podem ser compartilhadas por instâncias da aplicação e preservadas
-entre reinicializações, respeitado seu prazo de validade (MONGODB, [s. d.]).
+Os usuários são gravados na coleção `usuarios`. A anotação
+`@EnableMongoHttpSession` direciona as sessões para a coleção `sessoes`. Assim,
+o servidor pode recuperar a autenticação em requisições posteriores sem manter
+todo o estado apenas em memória. A integração do Spring Session com MongoDB
+também permite compartilhar as sessões entre instâncias compatíveis da
+aplicação (MONGODB, [s. d.]).
 
-Existe um teste de integração opcional para o Atlas. Ele usa identificador
-aleatório, coleção exclusiva `teste_conexao_atlas` e remove somente o documento
-criado. Esse teste permanece desabilitado na execução padrão e não foi
-executado durante esta etapa de documentação.
+O projeto inclui o teste opcional `AtlasConnectionIntegrationTest`. Ele cria um
+documento com identificador aleatório na coleção exclusiva
+`teste_conexao_atlas`, consulta os dados e remove somente o documento criado. O
+teste exige ativação explícita e permanece ignorado no comando Maven padrão.
 
 ## 8 INTERFACE THYMELEAF E PREPARAÇÃO PARA TEMAS
 
 A interface possui páginas de login, cadastro, painéis dos três perfis e acesso
-negado. Cabeçalho, navegação e rodapé são fragmentos reutilizáveis. O HTML fica
-em `templates`, enquanto o CSS fica em `static/css`, separado dos controllers e
-serviços.
+negado. Cabeçalho, navegação e rodapé são fragmentos reutilizáveis. Os templates
+ficam em `templates`, enquanto o estilo visual fica em `static/css`.
 
-O arquivo CSS utiliza propriedades personalizadas no seletor `:root` para
-cores, fonte, espaçamento, raio de borda e sombra. Uma futura personalização
-visual pode alterar essas variáveis sem modificar a autenticação ou as regras
-de negócio. O layout inclui regra responsiva para telas menores.
+O arquivo CSS declara propriedades personalizadas no seletor `:root` para
+cores, fonte, espaçamento, raio de borda e sombra. Uma nova identidade visual
+pode alterar essas variáveis sem interferir na autenticação ou nas regras de
+negócio. O CSS também adapta o layout para telas menores.
 
-Os templates apresentam apenas nome, e-mail e perfil. Nenhuma senha ou hash é
-adicionada ao modelo da página. Os formulários utilizam `th:action`,
-`th:field` e mensagens de erro, recursos previstos pela integração oficial
-entre Thymeleaf e Spring MVC (THYMELEAF, [s. d.]).
+Os templates exibem apenas nome, e-mail e perfil. Senha e hash não são
+adicionados ao modelo das páginas. Os formulários utilizam `th:action`,
+`th:field` e mensagens de erro da integração entre Thymeleaf e Spring MVC
+(THYMELEAF, [s. d.]).
 
 ## 9 TESTES REALIZADOS
 
-Os testes automatizados locais utilizam repositórios simulados e não acessam o
-MongoDB Atlas. A suíte cobre:
+Os testes locais usam repositórios e operações MongoDB simulados, sem conexão
+com o Atlas. A suíte verifica:
 
-- cadastro válido, validação, BCrypt e e-mail duplicado;
+- cadastro válido, normalização de e-mail, BCrypt e perfil padrão;
+- validação dos dados e tratamento de e-mail duplicado;
 - login correto, senha incorreta e usuário inexistente;
-- criação, reutilização e invalidação da sessão simulada;
+- criação e invalidação da sessão simulada;
 - consulta do usuário autenticado;
-- exigência de CSRF;
-- respostas sem senha ou hash;
+- exigência do token CSRF;
+- ausência de senha e hash nas respostas;
 - permissões e bloqueios dos três perfis;
 - páginas públicas e restritas;
 - cadastro, login, logout e redirecionamento pela interface;
 - renderização dos templates Thymeleaf;
-- propriedades do cookie e configuração da coleção de sessões.
+- atributos do cookie e configuração da coleção de sessões;
+- carregamento do contexto Spring sem acesso ao Atlas.
 
-Na revisão para entrega, 39 testes foram executados sem falhas, erros ou testes
-ignorados. A compilação Java também foi concluída pelo ciclo de testes Maven.
-Esse resultado não representa um teste de conexão real com o Atlas nesta etapa.
+O comando `.\mvnw.cmd clean test` contabilizou 41 testes, sem falhas ou erros.
+Quarenta testes foram executados com sucesso. O único teste ignorado foi o
+`AtlasConnectionIntegrationTest`, pois sua execução depende de solicitação
+explícita e de uma variável local com a conexão do Atlas.
 
 ## 10 CONSIDERAÇÕES FINAIS
 
-O projeto atingiu o objetivo de demonstrar cadastro, autenticação, autorização
-e gerenciamento de sessões com tecnologias do ecossistema Spring. A solução
-protege senhas com BCrypt, mantém CSRF ativo, limita o cadastro público ao
-perfil básico e diferencia recursos para três níveis de acesso.
+O Login Seguro reúne cadastro, autenticação por senha e autorização por perfis
+em uma aplicação pequena, com responsabilidades separadas entre controllers,
+serviços, repositórios e templates. O cadastro público sempre cria o perfil
+`USUARIO`, enquanto o Spring Security restringe os painéis de moderação e
+administração.
 
-A persistência de usuários e sessões no MongoDB atende ao requisito de manter
-o estado de autenticação fora da memória local. A interface Thymeleaf oferece
-um fluxo funcional sem framework JavaScript e mantém visual e lógica de negócio
-separados.
+As senhas permanecem protegidas por BCrypt, e as respostas não expõem o valor
+original nem o hash. O uso de sessões HTTP mantém a autenticação no servidor, e
+a integração com o MongoDB permite persistir esse estado fora da memória da
+aplicação. CSRF, cookies `HttpOnly` e a alteração do identificador da sessão
+complementam as medidas adotadas.
 
-Como etapa de entrega, ainda é necessário preencher os dados da capa, ajustar o
-texto ao modelo específico da instituição e exportar o documento para PDF. O
-repositório está público, e o histórico organizado com Gitflow deve receber uma
-última conferência antes da submissão final.
+A interface Thymeleaf cobre o fluxo principal sem depender de um framework
+JavaScript. A separação dos templates, estilos e regras de negócio facilita a
+leitura do projeto e permite modificar o tema visual sem alterar a segurança.
+Os testes automatizados verificam os principais comportamentos localmente e
+mantêm o acesso ao Atlas separado em um teste de integração opcional.
 
 ## REFERÊNCIAS
 
