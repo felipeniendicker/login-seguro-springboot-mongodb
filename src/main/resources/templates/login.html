@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Entrar | Login Seguro</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments :: cabecalho('Entrar')}"></header>
+<main class="container conteudo-central">
+	<section class="cartao formulario-cartao">
+		<h1>Acesse sua conta</h1>
+		<p class="subtitulo">Informe seu e-mail e sua senha.</p>
+
+		<div class="mensagem mensagem-erro" th:if="${param.erro}">
+			E-mail ou senha inválidos.
+		</div>
+		<div class="mensagem mensagem-sucesso" th:if="${param.logout}">
+			Sessão encerrada com segurança.
+		</div>
+		<div class="mensagem mensagem-sucesso" th:if="${param.cadastro}">
+			Cadastro realizado. Você já pode entrar.
+		</div>
+
+		<form th:action="@{/login}" method="post">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+			<label for="email">E-mail</label>
+			<input id="email" name="email" type="email" autocomplete="email" required>
+
+			<label for="senha">Senha</label>
+			<input id="senha" name="senha" type="password"
+			       autocomplete="current-password" required>
+
+			<button class="botao" type="submit">Entrar</button>
+		</form>
+
+		<p class="link-auxiliar">
+			Ainda não possui conta? <a th:href="@{/cadastro}">Cadastre-se</a>
+		</p>
+	</section>
+</main>
+<footer th:replace="~{fragments :: rodape}"></footer>
+</body>
+</html>

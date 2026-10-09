@@ -80,11 +80,28 @@ public class SecurityConfig {
                         .requireExplicitSave(true)
                 )
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint((request, response, exception) ->
-                                response.sendError(HttpStatus.UNAUTHORIZED.value()))
+                        .authenticationEntryPoint((request, response, exception) -> {
+                            if (request.getRequestURI().startsWith(
+                                    request.getContextPath() + "/api/")) {
+                                response.sendError(HttpStatus.UNAUTHORIZED.value());
+                                return;
+                            }
+                            response.sendRedirect(
+                                    request.getContextPath() + "/login");
+                        })
+                        .accessDeniedPage("/acesso-negado")
                 )
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/",
+                                "/login",
+                                "/cadastro",
+                                "/acesso-negado",
+                                "/css/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/cadastro").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -104,15 +121,43 @@ public class SecurityConfig {
                                 "/api/usuario/painel",
                                 "/api/auth/me"
                         ).hasAnyRole("USUARIO", "MODERADOR", "ADMIN")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/painel/admin"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/painel/moderador"
+                        ).hasAnyRole("MODERADOR", "ADMIN")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/painel",
+                                "/painel/usuario"
+                        ).hasAnyRole("USUARIO", "MODERADOR", "ADMIN")
                         .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("email")
+                        .passwordParameter("senha")
+                        .defaultSuccessUrl("/painel", true)
+                        .failureUrl("/login?erro")
+                        .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("SESSION")
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.setStatus(HttpStatus.NO_CONTENT.value()))
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            if ("true".equals(request.getParameter("web"))) {
+                                response.sendRedirect(
+                                        request.getContextPath() + "/login?logout");
+                                return;
+                            }
+                            response.setStatus(HttpStatus.NO_CONTENT.value());
+                        })
                 );
 
         return http.build();
