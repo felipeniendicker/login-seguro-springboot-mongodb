@@ -15,14 +15,24 @@ usuários e as sessões serão armazenados no MongoDB Atlas.
 - Spring Security
 - Thymeleaf
 - MongoDB Atlas
-- Spring Session Data MongoDB
+- MongoDB Spring Session
 - Maven
+
+## Perfis de acesso
+
+- `USUARIO`: acessa `/api/usuario/painel` e `/api/auth/me`.
+- `MODERADOR`: possui os acessos de `USUARIO` e acessa
+  `/api/moderador/painel`.
+- `ADMIN`: possui os acessos de `MODERADOR` e acessa `/api/admin/painel`.
+
+O cadastro público sempre cria usuários com o perfil `USUARIO`. Perfis
+privilegiados não podem ser escolhidos pela requisição de cadastro.
 
 ## Estado atual
 
-O projeto está na fase de preparação da estrutura inicial. A autenticação
-herdada está preservada temporariamente para migração em uma etapa posterior.
-Cadastro, login e logout ainda não foram implementados na nova arquitetura.
+O projeto possui cadastro público com perfil `USUARIO`, autenticação por sessão,
+logout, proteção CSRF e controle de acesso para três perfis. Usuários e sessões
+são persistidos no MongoDB.
 
 ## Configuração local do MongoDB Atlas
 

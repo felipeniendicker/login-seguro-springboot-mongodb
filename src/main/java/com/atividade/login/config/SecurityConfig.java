@@ -91,6 +91,19 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/usuarios/cadastro"
                         ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/admin/painel"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/moderador/painel"
+                        ).hasAnyRole("MODERADOR", "ADMIN")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/usuario/painel",
+                                "/api/auth/me"
+                        ).hasAnyRole("USUARIO", "MODERADOR", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
